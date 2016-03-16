@@ -19,6 +19,7 @@ import org.apache.felix.scr.annotations.*;
 import org.onosproject.app.ApplicationService;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.net.flow.FlowRuleService;
+import org.onosproject.net.group.GroupService;
 import org.onosproject.net.host.HostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,11 +41,13 @@ public class AppComponent {
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
 	protected FlowRuleService flowRuleService;
 
+	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+	protected GroupService groupService;
 
 	@Activate
 	protected void activate() {
 		ApplicationId appId = applicationService.getId("home.parham.sdvpn");
-		L2Switching l2Switching = new L2Switching(appId, flowRuleService);
+		L2Switching l2Switching = new L2Switching(appId, flowRuleService, groupService);
 		hostService.addListener(l2Switching);
 
 		log.info("Started");
