@@ -6,11 +6,16 @@ import org.onosproject.core.DefaultGroupId;
 import org.onosproject.core.GroupId;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.Host;
+import org.onosproject.net.Port;
+import org.onosproject.net.PortNumber;
 import org.onosproject.net.flow.*;
 import org.onosproject.net.group.*;
 import org.onosproject.net.host.HostEvent;
 import org.onosproject.net.host.HostEvent.Type;
 import org.onosproject.net.host.HostListener;
+import org.onosproject.net.packet.DefaultOutboundPacket;
+import org.onosproject.net.packet.OutboundPacket;
+import org.onosproject.net.packet.PacketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,18 +26,23 @@ import java.util.Map;
 
 public class L2Switching implements HostListener {
 
-	private FlowRuleService flowRuleService;
 	private ApplicationId appId;
+
+	private FlowRuleService flowRuleService;
 	private GroupService groupService;
+	private PacketService packetService;
 
 	private Map<VlanId, List<Host>> vlanIdMap;
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
-	public L2Switching(ApplicationId appId, FlowRuleService flowRuleService, GroupService groupService) {
+	public L2Switching(ApplicationId appId, FlowRuleService flowRuleService, GroupService groupService, PacketService packetService) {
 		this.appId = appId;
+
 		this.flowRuleService = flowRuleService;
 		this.groupService = groupService;
+		this.packetService = packetService;
+
 		this.vlanIdMap = new HashMap<>();
 	}
 
@@ -44,6 +54,7 @@ public class L2Switching implements HostListener {
 			DeviceId deviceId = host.location().deviceId();
 			GroupId gid = new DefaultGroupId(host.vlan().toShort() + 1373);
 			GroupKey gkey = new DefaultGroupKey(host.vlan().toString().getBytes());
+
 
 			if (!vlanIdMap.containsKey(host.vlan())) {
 				vlanIdMap.put(host.vlan(), new ArrayList<>());
@@ -67,7 +78,7 @@ public class L2Switching implements HostListener {
 				flowBuilder.forDevice(deviceId).withSelector(selector).withTreatment(treatment);
 				flowBuilder.makePermanent();
 				flowBuilder.fromApp(appId);
-				flowBuilder.withPriority(4000);
+				flowBuilder.withPriority(10);
 				FlowRule flowRule = flowBuilder.build();
 
 				/* Apply rule on device :) */
@@ -86,6 +97,15 @@ public class L2Switching implements HostListener {
 			GroupBuckets buckets = new GroupBuckets(bucketList);
 
 			groupService.addBucketsToGroup(deviceId, gkey, buckets, gkey, appId);
+
+			/* Pass our ARP packet to his destination ... */
+			/*
+			treatmentBuilder = DefaultTrafficTreatment.builder();
+			treatmentBuilder.setOutput(PortNumber.FLOOD);
+			treatment = treatmentBuilder.build();
+			OutboundPacket outboundPacket = new DefaultOutboundPacket(deviceId, treatment);
+			packetService.emit(outboundPacket);
+			*/
 		}
 	}
 }
