@@ -1,21 +1,20 @@
 package home.parham.sdvpn;
 
+import org.onlab.packet.EthType.EtherType;
+import org.onlab.packet.Ethernet;
 import org.onlab.packet.VlanId;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.DefaultGroupId;
 import org.onosproject.core.GroupId;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.Host;
-import org.onosproject.net.Port;
 import org.onosproject.net.PortNumber;
 import org.onosproject.net.flow.*;
 import org.onosproject.net.group.*;
 import org.onosproject.net.host.HostEvent;
 import org.onosproject.net.host.HostEvent.Type;
 import org.onosproject.net.host.HostListener;
-import org.onosproject.net.packet.DefaultOutboundPacket;
-import org.onosproject.net.packet.OutboundPacket;
-import org.onosproject.net.packet.PacketService;
+import org.onosproject.net.packet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class L2Switching implements HostListener {
+public class L2Switching implements HostListener, PacketProcessor {
 
 	private ApplicationId appId;
 
@@ -42,7 +41,6 @@ public class L2Switching implements HostListener {
 		this.flowRuleService = flowRuleService;
 		this.groupService = groupService;
 		this.packetService = packetService;
-
 		this.vlanIdMap = new HashMap<>();
 	}
 
@@ -59,7 +57,7 @@ public class L2Switching implements HostListener {
 			if (!vlanIdMap.containsKey(host.vlan())) {
 				vlanIdMap.put(host.vlan(), new ArrayList<>());
 
-				/* Add empty group table for our feature use :) */
+				/* Add empty group table for our future use */
 				GroupBuckets buckets = new GroupBuckets(new ArrayList<>());
 				GroupDescription groupDescription = new DefaultGroupDescription(deviceId, GroupDescription.Type.ALL, buckets, gkey, gid.id(), appId);
 				groupService.addGroup(groupDescription);
@@ -98,14 +96,29 @@ public class L2Switching implements HostListener {
 
 			groupService.addBucketsToGroup(deviceId, gkey, buckets, gkey, appId);
 
-			/* Pass our ARP packet to his destination ... */
-			/*
+		}
+	}
+
+	@Override
+	public void process(PacketContext context) {
+		if (context.isHandled()) {
+			return;
+		}
+		InboundPacket pkt = context.inPacket();
+		Ethernet ethPkt = pkt.parsed();
+		DeviceId deviceId = context.inPacket().receivedFrom().deviceId();
+
+		if (ethPkt == null) {
+			return;
+		}
+
+		if (ethPkt.getEtherType() == EtherType.ARP.ethType().toShort()) {
+			TrafficTreatment.Builder treatmentBuilder;
 			treatmentBuilder = DefaultTrafficTreatment.builder();
 			treatmentBuilder.setOutput(PortNumber.FLOOD);
-			treatment = treatmentBuilder.build();
-			OutboundPacket outboundPacket = new DefaultOutboundPacket(deviceId, treatment);
+			TrafficTreatment treatment = treatmentBuilder.build();
+			OutboundPacket outboundPacket = new DefaultOutboundPacket(deviceId, treatment, context.inPacket().unparsed());
 			packetService.emit(outboundPacket);
-			*/
 		}
 	}
 }

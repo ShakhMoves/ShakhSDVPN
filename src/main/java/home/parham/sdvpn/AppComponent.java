@@ -21,6 +21,7 @@ import org.onosproject.core.ApplicationId;
 import org.onosproject.net.flow.FlowRuleService;
 import org.onosproject.net.group.GroupService;
 import org.onosproject.net.host.HostService;
+import org.onosproject.net.packet.PacketProcessor;
 import org.onosproject.net.packet.PacketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,7 @@ public class AppComponent {
 		ApplicationId appId = applicationService.getId("home.parham.sdvpn");
 		L2Switching l2Switching = new L2Switching(appId, flowRuleService, groupService, packetService);
 		hostService.addListener(l2Switching);
+		packetService.addProcessor(l2Switching, PacketProcessor.director(2));
 
 		log.info("Started");
 	}
