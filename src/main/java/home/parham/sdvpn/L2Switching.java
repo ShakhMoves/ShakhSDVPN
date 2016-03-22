@@ -2,6 +2,7 @@ package home.parham.sdvpn;
 
 import org.onlab.packet.EthType.EtherType;
 import org.onlab.packet.Ethernet;
+import org.onlab.packet.MplsLabel;
 import org.onlab.packet.VlanId;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.DefaultGroupId;
@@ -35,7 +36,8 @@ public class L2Switching implements HostListener, PacketProcessor {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
-	public L2Switching(ApplicationId appId, FlowRuleService flowRuleService, GroupService groupService, PacketService packetService) {
+	public L2Switching(ApplicationId appId, FlowRuleService flowRuleService, GroupService groupService,
+	                   PacketService packetService) {
 		this.appId = appId;
 
 		this.flowRuleService = flowRuleService;
@@ -52,19 +54,23 @@ public class L2Switching implements HostListener, PacketProcessor {
 			DeviceId deviceId = host.location().deviceId();
 			GroupId gid = new DefaultGroupId(host.vlan().toShort() + 1373);
 			GroupKey gkey = new DefaultGroupKey(host.vlan().toString().getBytes());
+			MplsLabel mplsLabel = MplsLabel.mplsLabel(host.vlan().toShort() + 1373);
 
 
 			if (!vlanIdMap.containsKey(host.vlan())) {
 				vlanIdMap.put(host.vlan(), new ArrayList<>());
 
+				/* Rules for removing the MPLS tag */
+				
 				/* Add empty group table for our future use */
 				GroupBuckets buckets = new GroupBuckets(new ArrayList<>());
-				GroupDescription groupDescription = new DefaultGroupDescription(deviceId, GroupDescription.Type.ALL, buckets, gkey, gid.id(), appId);
+				GroupDescription groupDescription = new DefaultGroupDescription(deviceId,
+					GroupDescription.Type.ALL, buckets, gkey, gid.id(), appId);
 				groupService.addGroup(groupDescription);
 
 				/* Build traffic selector */
 				TrafficSelector.Builder selectorBuilder = DefaultTrafficSelector.builder();
-				TrafficSelector selector = selectorBuilder.matchVlanId(host.vlan()).build();
+				TrafficSelector selector = selectorBuilder.matchMplsLabel(mplsLabel).build();
 
 				/* Build traffic treatment */
 				TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
@@ -79,15 +85,38 @@ public class L2Switching implements HostListener, PacketProcessor {
 				flowBuilder.withPriority(10);
 				FlowRule flowRule = flowBuilder.build();
 
-				/* Apply rule on device :) */
+				/* Apply rule on device */
 				flowRuleService.applyFlowRules(flowRule);
+				
+				/* Rules for applying the MPLS tag */
 
+				/* Build traffic selector */
+				selector = selectorBuilder.matchInPhyPort(host.location().port()).build();
+
+				/* Build traffic treatment */
+				treatmentBuilder = DefaultTrafficTreatment.builder();
+				treatmentBuilder.setMpls(mplsLabel);
+				treatmentBuilder.setVlanId(VlanId.NONE);
+				treatment = treatmentBuilder.build();
+
+				/* Build flow rule based on our treatment and selector */
+				flowBuilder = new DefaultFlowRule.Builder();
+				flowBuilder.forDevice(deviceId).withSelector(selector).withTreatment(treatment);
+				flowBuilder.makePermanent();
+				flowBuilder.fromApp(appId);
+				flowBuilder.withPriority(10);
+				flowRule = flowBuilder.build();
+
+				/* Apply rule on device */
+				flowRuleService.applyFlowRules(flowRule);
 			}
 
 			vlanIdMap.get(host.vlan()).add(host);
 
 			TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
 			treatmentBuilder.setOutput(host.location().port());
+			treatmentBuilder.popMpls();
+			treatmentBuilder.setVlanId(host.vlan());
 			TrafficTreatment treatment = treatmentBuilder.build();
 			GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
 			List<GroupBucket> bucketList = new ArrayList<>();

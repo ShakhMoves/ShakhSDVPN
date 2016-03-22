@@ -23,6 +23,8 @@ import org.onosproject.net.group.GroupService;
 import org.onosproject.net.host.HostService;
 import org.onosproject.net.packet.PacketProcessor;
 import org.onosproject.net.packet.PacketService;
+import org.onosproject.net.topology.PathService;
+import org.onosproject.net.topology.TopologyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +50,7 @@ public class AppComponent {
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
 	protected PacketService packetService;
+
 
 	@Activate
 	protected void activate() {
