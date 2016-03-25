@@ -130,30 +130,34 @@ public class L2Switching implements HostListener, PacketProcessor {
 				paths = topologyService.getPaths(topologyService.currentTopology(),
 					h.location().deviceId(), deviceId);
 
-				/* We just want 1 path for our purpose :) */
-				Path p = paths.iterator().next();
+				if (paths.size() > 0) {
+					/* We just want 1 path for our purpose :) */
+					Path p = paths.iterator().next();
 
-				/* Add MPLS forwarding rule for all devices except sink device */
-				for (Link l : p.links()) {
-					DeviceId pathNodeDevice = l.src().deviceId();
-					PortNumber pathNodePort = l.src().port();
+					/* Add MPLS forwarding rule for all devices except sink device */
+					for (Link l : p.links()) {
+						DeviceId pathNodeDevice = l.src().deviceId();
+						PortNumber pathNodePort = l.src().port();
 
-					TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
-					treatmentBuilder.setOutput(pathNodePort);
-					TrafficTreatment treatment = treatmentBuilder.build();
-					GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
-					List<GroupBucket> bucketList = new ArrayList<>();
-					bucketList.add(bucket);
-					GroupBuckets buckets = new GroupBuckets(bucketList);
+						TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
+						treatmentBuilder.setOutput(pathNodePort);
+						TrafficTreatment treatment = treatmentBuilder.build();
+						GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
+						List<GroupBucket> bucketList = new ArrayList<>();
+						bucketList.add(bucket);
+						GroupBuckets buckets = new GroupBuckets(bucketList);
 
-					groupService.addBucketsToGroup(pathNodeDevice, gkey, buckets, gkey, appId);
+						groupService.addBucketsToGroup(pathNodeDevice, gkey, buckets, gkey, appId);
+					}
 				}
 
 				/* Add our last rule for sink device */
 				TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
 				treatmentBuilder.setOutput(h.location().port());
 				treatmentBuilder.popMpls();
-				treatmentBuilder.setVlanId(host.vlan());
+				if (host.vlan() != VlanId.NONE) {
+					treatmentBuilder.setVlanId(host.vlan());
+				}
 				TrafficTreatment treatment = treatmentBuilder.build();
 				GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
 				List<GroupBucket> bucketList = new ArrayList<>();
