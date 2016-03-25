@@ -31,7 +31,7 @@ public class L2Switching implements HostListener, PacketProcessor {
 	private DeviceService deviceService;
 	private TopologyService topologyService;
 
-	private Map<VlanId, List<Host>> vlanIdMap;
+	private Map<VlanId, List<Host>> vLanIdMap;
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -44,13 +44,11 @@ public class L2Switching implements HostListener, PacketProcessor {
 		this.packetService = packetService;
 		this.deviceService = deviceService;
 		this.topologyService = topologyService;
-		this.vlanIdMap = new HashMap<>();
+		this.vLanIdMap = new HashMap<>();
 	}
 
 	public void event(HostEvent event) {
 		if (event.type() == Type.HOST_ADDED) {
-			log.info("Start adding new host " + event.subject());
-
 			Host host = event.subject();
 			DeviceId deviceId = host.location().deviceId();
 			GroupId gid = new DefaultGroupId(host.vlan().toShort() + 1373);
@@ -59,9 +57,9 @@ public class L2Switching implements HostListener, PacketProcessor {
 
 
 			/* When we see new VLan */
-			if (!vlanIdMap.containsKey(host.vlan())) {
+			if (!vLanIdMap.containsKey(host.vlan())) {
 				/* Create empty array for hosts of these VLan */
-				vlanIdMap.put(host.vlan(), new ArrayList<>());
+				vLanIdMap.put(host.vlan(), new ArrayList<>());
 
 				/* Rules for removing the MPLS tag */
 
@@ -76,7 +74,8 @@ public class L2Switching implements HostListener, PacketProcessor {
 
 					/* Build traffic selector */
 					TrafficSelector.Builder selectorBuilder = DefaultTrafficSelector.builder();
-					TrafficSelector selector = selectorBuilder.matchMplsLabel(mplsLabel).build();
+					// TrafficSelector selector = selectorBuilder.matchMplsLabel(mplsLabel).build();
+					TrafficSelector selector = selectorBuilder.matchVlanId(host.vlan()).build();
 
 					/* Build traffic treatment */
 					TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
@@ -92,7 +91,7 @@ public class L2Switching implements HostListener, PacketProcessor {
 					flowBuilder.forDevice(d.id()).withSelector(selector).withTreatment(treatment);
 					flowBuilder.makePermanent();
 					flowBuilder.fromApp(appId);
-					flowBuilder.forTable(1);
+					//flowBuilder.forTable(1);
 					flowBuilder.withPriority(10);
 					FlowRule flowRule = flowBuilder.build();
 
@@ -115,7 +114,8 @@ public class L2Switching implements HostListener, PacketProcessor {
 					flowBuilder.withPriority(10);
 					flowRule = flowBuilder.build();
 
-					flowRuleService.applyFlowRules(flowRule);
+					//flowRuleService.applyFlowRules(flowRule);
+
 
 				}
 			}
@@ -125,7 +125,7 @@ public class L2Switching implements HostListener, PacketProcessor {
 			 * that has the same VLanID
 			 */
 			Set<Path> paths;
-			for (Host h : vlanIdMap.get(host.vlan())) {
+			for (Host h : vLanIdMap.get(host.vlan())) {
 				paths = topologyService.getPaths(topologyService.currentTopology(),
 					h.location().deviceId(), deviceId);
 
@@ -153,10 +153,10 @@ public class L2Switching implements HostListener, PacketProcessor {
 				/* Add our last rule for sink device */
 				TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
 				treatmentBuilder.setOutput(h.location().port());
-				treatmentBuilder.popMpls();
-				if (host.vlan().toShort() != -1) {
-					treatmentBuilder.setVlanId(host.vlan());
-				}
+				//treatmentBuilder.popMpls();
+				//if (host.vlan().toShort() != -1) {
+				//	treatmentBuilder.setVlanId(host.vlan());
+				//}
 				TrafficTreatment treatment = treatmentBuilder.build();
 				GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
 				List<GroupBucket> bucketList = new ArrayList<>();
@@ -191,9 +191,9 @@ public class L2Switching implements HostListener, PacketProcessor {
 			FlowRule flowRule = flowBuilder.build();
 
 			/* Apply rule on device */
-			flowRuleService.applyFlowRules(flowRule);
+			//flowRuleService.applyFlowRules(flowRule);
 
-			vlanIdMap.get(host.vlan()).add(host);
+			vLanIdMap.get(host.vlan()).add(host);
 		}
 	}
 
