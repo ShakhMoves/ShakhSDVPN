@@ -18,12 +18,12 @@ package home.parham.sdvpn;
 import org.apache.felix.scr.annotations.*;
 import org.onosproject.app.ApplicationService;
 import org.onosproject.core.ApplicationId;
+import org.onosproject.net.device.DeviceService;
 import org.onosproject.net.flow.FlowRuleService;
 import org.onosproject.net.group.GroupService;
 import org.onosproject.net.host.HostService;
 import org.onosproject.net.packet.PacketProcessor;
 import org.onosproject.net.packet.PacketService;
-import org.onosproject.net.topology.PathService;
 import org.onosproject.net.topology.TopologyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,11 +51,17 @@ public class AppComponent {
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
 	protected PacketService packetService;
 
+	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+	protected DeviceService deviceService;
+
+	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+	protected TopologyService topologyService;
 
 	@Activate
 	protected void activate() {
 		ApplicationId appId = applicationService.getId("home.parham.sdvpn");
-		L2Switching l2Switching = new L2Switching(appId, flowRuleService, groupService, packetService);
+		L2Switching l2Switching = new L2Switching(appId, flowRuleService, groupService, packetService, deviceService,
+			topologyService);
 		hostService.addListener(l2Switching);
 		packetService.addProcessor(l2Switching, PacketProcessor.director(2));
 
