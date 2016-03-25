@@ -74,8 +74,9 @@ public class L2Switching implements HostListener, PacketProcessor {
 
 					/* Build traffic selector */
 					TrafficSelector.Builder selectorBuilder = DefaultTrafficSelector.builder();
-					// TrafficSelector selector = selectorBuilder.matchMplsLabel(mplsLabel).build();
-					TrafficSelector selector = selectorBuilder.matchVlanId(host.vlan()).build();
+					selectorBuilder.matchEthType((short) 0x8847);
+					TrafficSelector selector = selectorBuilder.matchMplsLabel(mplsLabel).build();
+					// TrafficSelector selector = selectorBuilder.matchVlanId(host.vlan()).build();
 
 					/* Build traffic treatment */
 					TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
@@ -91,7 +92,7 @@ public class L2Switching implements HostListener, PacketProcessor {
 					flowBuilder.forDevice(d.id()).withSelector(selector).withTreatment(treatment);
 					flowBuilder.makePermanent();
 					flowBuilder.fromApp(appId);
-					//flowBuilder.forTable(1);
+					flowBuilder.forTable(1);
 					flowBuilder.withPriority(10);
 					FlowRule flowRule = flowBuilder.build();
 
@@ -100,9 +101,12 @@ public class L2Switching implements HostListener, PacketProcessor {
 					/* Add rule for redirect our flow into table 1 for table 0 */
 
 					/* Build traffic selector */
+					selectorBuilder = DefaultTrafficSelector.builder();
+					selectorBuilder.matchEthType((short) 0x8847);
 					selector = selectorBuilder.matchMplsLabel(mplsLabel).build();
 
 					/* Build traffic treatment */
+					treatmentBuilder = DefaultTrafficTreatment.builder();
 					treatment = treatmentBuilder.transition(1).build();
 
 					/* Build the rule at the end :) */
@@ -114,7 +118,7 @@ public class L2Switching implements HostListener, PacketProcessor {
 					flowBuilder.withPriority(10);
 					flowRule = flowBuilder.build();
 
-					//flowRuleService.applyFlowRules(flowRule);
+					flowRuleService.applyFlowRules(flowRule);
 
 
 				}
@@ -151,10 +155,7 @@ public class L2Switching implements HostListener, PacketProcessor {
 				/* Add our last rule for sink device */
 				TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
 				treatmentBuilder.setOutput(h.location().port());
-				//treatmentBuilder.popMpls();
-				//if (host.vlan().toShort() != -1) {
-				//	treatmentBuilder.setVlanId(host.vlan());
-				//}
+				treatmentBuilder.popMpls();
 				TrafficTreatment treatment = treatmentBuilder.build();
 				GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
 				List<GroupBucket> bucketList = new ArrayList<>();
@@ -168,12 +169,12 @@ public class L2Switching implements HostListener, PacketProcessor {
 
 			/* Build traffic selector */
 			TrafficSelector.Builder selectorBuilder = DefaultTrafficSelector.builder();
-			TrafficSelector selector = selectorBuilder.matchInPhyPort(host.location().port()).build();
+			TrafficSelector selector = selectorBuilder.matchInPort(host.location().port()).build();
 
 			/* Build traffic treatment */
 			TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
+			treatmentBuilder.pushMpls();
 			treatmentBuilder.setMpls(mplsLabel);
-			treatmentBuilder.setVlanId(VlanId.NONE);
 			treatmentBuilder.transition(1);
 			TrafficTreatment treatment = treatmentBuilder.build();
 
@@ -189,12 +190,15 @@ public class L2Switching implements HostListener, PacketProcessor {
 			FlowRule flowRule = flowBuilder.build();
 
 			/* Apply rule on device */
-			//flowRuleService.applyFlowRules(flowRule);
+			flowRuleService.applyFlowRules(flowRule);
 
 			vLanIdMap.get(host.vlan()).add(host);
 		}
 	}
 
+	/*
+	 * We use this function in order to simplify our MPLS tunnel creation :)
+	 */
 	private void buildTunnelPath(Path p, GroupKey gkey) {
 		/* Add MPLS forwarding rule for all devices except sink device */
 		for (Link l : p.links()) {
