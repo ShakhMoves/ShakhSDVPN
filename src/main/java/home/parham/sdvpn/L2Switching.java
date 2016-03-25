@@ -156,6 +156,7 @@ public class L2Switching implements HostListener, PacketProcessor {
 				TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
 				treatmentBuilder.setOutput(h.location().port());
 				treatmentBuilder.popMpls();
+				treatmentBuilder.popMpls();
 				TrafficTreatment treatment = treatmentBuilder.build();
 				GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
 				List<GroupBucket> bucketList = new ArrayList<>();
@@ -234,6 +235,7 @@ public class L2Switching implements HostListener, PacketProcessor {
 			TrafficTreatment.Builder treatmentBuilder;
 			treatmentBuilder = DefaultTrafficTreatment.builder();
 			treatmentBuilder.setOutput(PortNumber.FLOOD);
+			treatmentBuilder.decNwTtl();
 			TrafficTreatment treatment = treatmentBuilder.build();
 			OutboundPacket outboundPacket = new DefaultOutboundPacket(deviceId, treatment,
 				context.inPacket().unparsed());

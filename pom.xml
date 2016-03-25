@@ -14,20 +14,21 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>home.parham.sdvpn</groupId>
     <artifactId>sdvpn</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.3-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
-    <description>ONOS OSGi bundle archetype</description>
+    <description>SDN based VPLS implementation</description>
     <url>http://onosproject.org</url>
 
     <properties>
         <onos.version>1.4.0-SNAPSHOT</onos.version>
-	<!-- Uncomment to generate ONOS app from this module. -->
+        <!-- Uncomment to generate ONOS app from this module. -->
         <onos.app.name>home.parham.sdvpn</onos.app.name>
         <onos.app.origin>ShakhMoves</onos.app.origin>
     </properties>
