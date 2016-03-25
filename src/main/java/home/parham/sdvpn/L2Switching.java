@@ -154,7 +154,7 @@ public class L2Switching implements HostListener, PacketProcessor {
 				TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
 				treatmentBuilder.setOutput(h.location().port());
 				treatmentBuilder.popMpls();
-				if (host.vlan() != VlanId.NONE) {
+				if (host.vlan().toShort() != -1) {
 					treatmentBuilder.setVlanId(host.vlan());
 				}
 				TrafficTreatment treatment = treatmentBuilder.build();
