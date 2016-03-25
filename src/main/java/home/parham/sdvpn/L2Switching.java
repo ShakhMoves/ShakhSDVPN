@@ -155,8 +155,7 @@ public class L2Switching implements HostListener, PacketProcessor {
 				/* Add our last rule for sink device */
 				TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
 				treatmentBuilder.setOutput(h.location().port());
-				treatmentBuilder.popMpls();
-				treatmentBuilder.popMpls();
+				treatmentBuilder.popMpls(EtherType.IPV4.ethType());
 				TrafficTreatment treatment = treatmentBuilder.build();
 				GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
 				List<GroupBucket> bucketList = new ArrayList<>();
