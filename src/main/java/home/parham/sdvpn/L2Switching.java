@@ -10,6 +10,7 @@ import org.onosproject.core.GroupId;
 import org.onosproject.net.*;
 import org.onosproject.net.device.DeviceService;
 import org.onosproject.net.flow.*;
+import org.onosproject.net.flow.instructions.Instruction;
 import org.onosproject.net.group.*;
 import org.onosproject.net.host.HostEvent;
 import org.onosproject.net.host.HostEvent.Type;
@@ -56,12 +57,75 @@ public class L2Switching implements HostListener, PacketProcessor {
 			GroupId gid = new DefaultGroupId(host.vlan().toShort() + 1373);
 			GroupKey gkey = new DefaultGroupKey(host.vlan().toString().getBytes());
 			MplsLabel mplsLabel = MplsLabel.mplsLabel(host.vlan().toShort() + 1373);
-			Set<Path> paths;
+
+
+			/* When we see new VLan */
+			if (!vlanIdMap.containsKey(host.vlan())) {
+				/* Create empty array for hosts of these VLan */
+				vlanIdMap.put(host.vlan(), new ArrayList<>());
+
+				/* Rules for removing the MPLS tag */
+
+				for (Device d : deviceService.getAvailableDevices()) {
+					/* Add empty group table for our future use */
+					GroupBuckets buckets = new GroupBuckets(new ArrayList<>());
+					GroupDescription groupDescription = new DefaultGroupDescription(d.id(),
+						GroupDescription.Type.ALL, buckets, gkey, gid.id(), appId);
+					groupService.addGroup(groupDescription);
+
+					/* Add rule for our empty group in table 1 */
+
+					/* Build traffic selector */
+					TrafficSelector.Builder selectorBuilder = DefaultTrafficSelector.builder();
+					TrafficSelector selector = selectorBuilder.matchMplsLabel(mplsLabel).build();
+
+					/* Build traffic treatment */
+					TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
+					treatmentBuilder.group(gid);
+					TrafficTreatment treatment = treatmentBuilder.build();
+
+					/*
+					 * Build flow rule based on our treatment and
+					 * selector for table 1
+					 * because we want another rule for table 0
+				        */
+					FlowRule.Builder flowBuilder = new DefaultFlowRule.Builder();
+					flowBuilder.forDevice(d.id()).withSelector(selector).withTreatment(treatment);
+					flowBuilder.makePermanent();
+					flowBuilder.fromApp(appId);
+					flowBuilder.forTable(1);
+					flowBuilder.withPriority(10);
+					FlowRule flowRule = flowBuilder.build();
+
+					flowRuleService.applyFlowRules(flowRule);
+
+					/* Add rule for redirect our flow into table 1 for table 0 */
+
+					/* Build traffic selector */
+					selector = selectorBuilder.matchMplsLabel(mplsLabel).build();
+
+					/* Build traffic treatment */
+					treatment = treatmentBuilder.transition(1).build();
+
+					/* Build the rule at the end :) */
+					flowBuilder = new DefaultFlowRule.Builder();
+					flowBuilder.forDevice(d.id()).withSelector(selector).withTreatment(treatment);
+					flowBuilder.makePermanent();
+					flowBuilder.fromApp(appId);
+					flowBuilder.forTable(0);
+					flowBuilder.withPriority(10);
+					flowRule = flowBuilder.build();
+
+					flowRuleService.applyFlowRules(flowRule);
+
+				}
+			}
 
 			/*
 			 * Create path between our new host and all old hosts
 			 * that has the same VLanID
 			 */
+			Set<Path> paths;
 			for (Host h : vlanIdMap.get(host.vlan())) {
 				paths = topologyService.getPaths(topologyService.currentTopology(),
 					h.location().deviceId(), deviceId);
@@ -69,89 +133,64 @@ public class L2Switching implements HostListener, PacketProcessor {
 				/* We just want 1 path for our purpose :) */
 				Path p = paths.iterator().next();
 
+				/* Add MPLS forwarding rule for all devices except sink device */
 				for (Link l : p.links()) {
-					DeviceId pathDevice = l.src().deviceId();
-					PortNumber pathPort = l.src().port();
+					DeviceId pathNodeDevice = l.src().deviceId();
+					PortNumber pathNodePort = l.src().port();
+
+					TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
+					treatmentBuilder.setOutput(pathNodePort);
+					TrafficTreatment treatment = treatmentBuilder.build();
+					GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
+					List<GroupBucket> bucketList = new ArrayList<>();
+					bucketList.add(bucket);
+					GroupBuckets buckets = new GroupBuckets(bucketList);
+
+					groupService.addBucketsToGroup(pathNodeDevice, gkey, buckets, gkey, appId);
 				}
-			}
 
-			/* When we see new VLan */
-			if (!vlanIdMap.containsKey(host.vlan())) {
-				vlanIdMap.put(host.vlan(), new ArrayList<>());
-
-				/* Rules for removing the MPLS tag */
-
-				/* Add empty group table for our future use */
-				GroupBuckets buckets = new GroupBuckets(new ArrayList<>());
-				GroupDescription groupDescription = new DefaultGroupDescription(pathDevice,
-					GroupDescription.Type.ALL, buckets, gkey, gid.id(), appId);
-				groupService.addGroup(groupDescription);
-
-				/* Add rule for our empty group */
-
-				/* Build traffic selector */
-				TrafficSelector.Builder selectorBuilder = DefaultTrafficSelector.builder();
-				TrafficSelector selector = selectorBuilder.matchMplsLabel(mplsLabel).build();
-
-				/* Build traffic treatment */
+				/* Add our last rule for sink device */
 				TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
-				treatmentBuilder.group(gid);
+				treatmentBuilder.setOutput(h.location().port());
+				treatmentBuilder.popMpls();
+				treatmentBuilder.setVlanId(host.vlan());
 				TrafficTreatment treatment = treatmentBuilder.build();
+				GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
+				List<GroupBucket> bucketList = new ArrayList<>();
+				bucketList.add(bucket);
+				GroupBuckets buckets = new GroupBuckets(bucketList);
 
-				/*
-				 * Build flow rule based on our treatment and
-				 * selector
-				 */
-				FlowRule.Builder flowBuilder = new DefaultFlowRule.Builder();
-				flowBuilder.forDevice(pathDevice).withSelector(selector).withTreatment(treatment);
-				flowBuilder.makePermanent();
-				flowBuilder.fromApp(appId);
-				flowBuilder.withPriority(10);
-				FlowRule flowRule = flowBuilder.build();
-
-							/* Apply rule on device */
-				flowRuleService.applyFlowRules(flowRule);
-
-							/* Rules for applying the MPLS tag */
-
-							/* Build traffic selector */
-				selector = selectorBuilder.matchInPhyPort(host.location().port()).build();
-
-							/* Build traffic treatment */
-				treatmentBuilder = DefaultTrafficTreatment.builder();
-				treatmentBuilder.setMpls(mplsLabel);
-				treatmentBuilder.setVlanId(VlanId.NONE);
-				treatment = treatmentBuilder.build();
-
-							/*
-							 * Build flow rule based on our treatment and
-							 * selector
-							 */
-				flowBuilder = new DefaultFlowRule.Builder();
-				flowBuilder.forDevice(pathDevice).withSelector(selector).withTreatment(treatment);
-				flowBuilder.makePermanent();
-				flowBuilder.fromApp(appId);
-				flowBuilder.withPriority(10);
-				flowRule = flowBuilder.build();
-
-							/* Apply rule on device */
-				flowRuleService.applyFlowRules(flowRule);
+				groupService.addBucketsToGroup(h.location().deviceId(), gkey, buckets, gkey, appId);
 			}
+
+			/* Rules for applying the MPLS tag at source switch */
+
+			/* Build traffic selector */
+			TrafficSelector.Builder selectorBuilder = DefaultTrafficSelector.builder();
+			TrafficSelector selector = selectorBuilder.matchInPhyPort(host.location().port()).build();
+
+			/* Build traffic treatment */
+			TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
+			treatmentBuilder.setMpls(mplsLabel);
+			treatmentBuilder.setVlanId(VlanId.NONE);
+			treatmentBuilder.transition(1);
+			TrafficTreatment treatment = treatmentBuilder.build();
+
+			/*
+			 * Build flow rule based on our treatment and
+			 * selector
+			*/
+			FlowRule.Builder flowBuilder = new DefaultFlowRule.Builder();
+			flowBuilder.forDevice(deviceId).withSelector(selector).withTreatment(treatment);
+			flowBuilder.makePermanent();
+			flowBuilder.fromApp(appId);
+			flowBuilder.withPriority(20);
+			FlowRule flowRule = flowBuilder.build();
+
+			/* Apply rule on device */
+			flowRuleService.applyFlowRules(flowRule);
 
 			vlanIdMap.get(host.vlan()).add(host);
-
-			TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
-			treatmentBuilder.setOutput(pathPort);
-			treatmentBuilder.popMpls();
-			treatmentBuilder.setVlanId(host.vlan());
-			TrafficTreatment treatment = treatmentBuilder.build();
-			GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
-			List<GroupBucket> bucketList = new ArrayList<>();
-			bucketList.add(bucket);
-			GroupBuckets buckets = new GroupBuckets(bucketList);
-
-			groupService.addBucketsToGroup(pathDevice, gkey, buckets, gkey, appId);
-
 		}
 	}
 
