@@ -19,15 +19,22 @@ import argparse
 
 #
 # We want to build following topology:
-# h1 --- s1 --- s2 --- h2
+# h1 --- s1 --- s2 --- h3
+# h2 --- |       | --- h4
 #
 class PathTopo(Topo):
     def build(self, *args, **params):
         h1 = self.addHost(name='h1')
         s1 = self.addSwitch(name='s1')
         h2 = self.addHost(name='h2')
+        h3 = self.addHost(name='h3')
+        s2 = self.addSwitch(name='s2')
+        h4 = self.addHost(name='h4')
         self.addLink(h1, s1)
         self.addLink(h2, s1)
+        self.addLink(h3, s2)
+        self.addLink(h4, s2)
+        self.addLink(s1, s2)
 
 
 if __name__ == '__main__':
