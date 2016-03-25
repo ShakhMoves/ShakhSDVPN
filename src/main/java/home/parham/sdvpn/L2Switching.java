@@ -120,6 +120,8 @@ public class L2Switching implements HostListener, PacketProcessor {
 				}
 			}
 
+			/* And we do this for all our new hosts :) */
+
 			/*
 			 * Create path between our new host and all old hosts
 			 * that has the same VLanID
@@ -127,27 +129,23 @@ public class L2Switching implements HostListener, PacketProcessor {
 			Set<Path> paths;
 			for (Host h : vLanIdMap.get(host.vlan())) {
 				paths = topologyService.getPaths(topologyService.currentTopology(),
+					deviceId, h.location().deviceId());
+
+				if (paths.size() > 0) {
+					/* We just want 1 path for our purpose :) */
+					Path p = paths.iterator().next();
+
+					buildTunnelPath(p, gkey);
+				}
+
+				paths = topologyService.getPaths(topologyService.currentTopology(),
 					h.location().deviceId(), deviceId);
 
 				if (paths.size() > 0) {
 					/* We just want 1 path for our purpose :) */
 					Path p = paths.iterator().next();
 
-					/* Add MPLS forwarding rule for all devices except sink device */
-					for (Link l : p.links()) {
-						DeviceId pathNodeDevice = l.src().deviceId();
-						PortNumber pathNodePort = l.src().port();
-
-						TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
-						treatmentBuilder.setOutput(pathNodePort);
-						TrafficTreatment treatment = treatmentBuilder.build();
-						GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
-						List<GroupBucket> bucketList = new ArrayList<>();
-						bucketList.add(bucket);
-						GroupBuckets buckets = new GroupBuckets(bucketList);
-
-						groupService.addBucketsToGroup(pathNodeDevice, gkey, buckets, gkey, appId);
-					}
+					buildTunnelPath(p, gkey);
 				}
 
 				/* Add our last rule for sink device */
@@ -197,6 +195,23 @@ public class L2Switching implements HostListener, PacketProcessor {
 		}
 	}
 
+	private void buildTunnelPath(Path p, GroupKey gkey) {
+		/* Add MPLS forwarding rule for all devices except sink device */
+		for (Link l : p.links()) {
+			DeviceId pathNodeDevice = l.src().deviceId();
+			PortNumber pathNodePort = l.src().port();
+
+			TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
+			treatmentBuilder.setOutput(pathNodePort);
+			TrafficTreatment treatment = treatmentBuilder.build();
+			GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
+			List<GroupBucket> bucketList = new ArrayList<>();
+			bucketList.add(bucket);
+			GroupBuckets buckets = new GroupBuckets(bucketList);
+
+			groupService.addBucketsToGroup(pathNodeDevice, gkey, buckets, gkey, appId);
+		}
+	}
 
 	@Override
 	public void process(PacketContext context) {
