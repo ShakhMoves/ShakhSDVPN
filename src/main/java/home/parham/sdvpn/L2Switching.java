@@ -1,7 +1,19 @@
+/*
+ * In The Name Of God
+ * ======================================
+ * [] Project Name : ShakhSDVPN
+ *
+ * [] Package Name : home.parham.sdvpn
+ *
+ * [] Creation Date : 26-03-2016
+ *
+ * [] Created By : Parham Alvani (parham.alvani@gmail.com)
+ * =======================================
+*/
+
 package home.parham.sdvpn;
 
 import org.onlab.packet.EthType.EtherType;
-import org.onlab.packet.Ethernet;
 import org.onlab.packet.MplsLabel;
 import org.onlab.packet.VlanId;
 import org.onosproject.core.ApplicationId;
@@ -14,20 +26,18 @@ import org.onosproject.net.group.*;
 import org.onosproject.net.host.HostEvent;
 import org.onosproject.net.host.HostEvent.Type;
 import org.onosproject.net.host.HostListener;
-import org.onosproject.net.packet.*;
 import org.onosproject.net.topology.TopologyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class L2Switching implements HostListener, PacketProcessor {
+public class L2Switching implements HostListener {
 
 	private ApplicationId appId;
 
 	private FlowRuleService flowRuleService;
 	private GroupService groupService;
-	private PacketService packetService;
 	private DeviceService deviceService;
 	private TopologyService topologyService;
 
@@ -36,14 +46,14 @@ public class L2Switching implements HostListener, PacketProcessor {
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	public L2Switching(ApplicationId appId, FlowRuleService flowRuleService, GroupService groupService,
-	                   PacketService packetService, DeviceService deviceService, TopologyService topologyService) {
+	                   DeviceService deviceService, TopologyService topologyService) {
 		this.appId = appId;
 
 		this.flowRuleService = flowRuleService;
 		this.groupService = groupService;
-		this.packetService = packetService;
 		this.deviceService = deviceService;
 		this.topologyService = topologyService;
+
 		this.vLanIdMap = new HashMap<>();
 	}
 
@@ -124,6 +134,9 @@ public class L2Switching implements HostListener, PacketProcessor {
 				}
 			}
 
+			/* Add new host into VLan based host list */
+			vLanIdMap.get(host.vlan()).add(host);
+
 			/* And we do this for all our new hosts :) */
 
 			/*
@@ -192,7 +205,6 @@ public class L2Switching implements HostListener, PacketProcessor {
 			/* Apply rule on device */
 			flowRuleService.applyFlowRules(flowRule);
 
-			vLanIdMap.get(host.vlan()).add(host);
 		}
 	}
 
@@ -217,28 +229,5 @@ public class L2Switching implements HostListener, PacketProcessor {
 		}
 	}
 
-	@Override
-	public void process(PacketContext context) {
-		if (context.isHandled()) {
-			return;
-		}
-		InboundPacket pkt = context.inPacket();
-		Ethernet ethPkt = pkt.parsed();
-		DeviceId deviceId = context.inPacket().receivedFrom().deviceId();
 
-		if (ethPkt == null) {
-			return;
-		}
-
-		if (ethPkt.getEtherType() == EtherType.ARP.ethType().toShort()) {
-			TrafficTreatment.Builder treatmentBuilder;
-			treatmentBuilder = DefaultTrafficTreatment.builder();
-			treatmentBuilder.setOutput(PortNumber.FLOOD);
-			treatmentBuilder.decNwTtl();
-			TrafficTreatment treatment = treatmentBuilder.build();
-			OutboundPacket outboundPacket = new DefaultOutboundPacket(deviceId, treatment,
-				context.inPacket().unparsed());
-			packetService.emit(outboundPacket);
-		}
-	}
 }
