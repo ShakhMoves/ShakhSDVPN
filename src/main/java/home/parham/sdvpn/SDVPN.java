@@ -59,7 +59,7 @@ public class SDVPN {
 		ApplicationId appId = applicationService.getId("home.parham.sdvpn");
 		L2Switching l2Switching = new L2Switching(appId, flowRuleService, groupService, deviceService,
 			topologyService);
-		ARPHandler arpHandler = new ARPHandler(packetService);
+		ARPHandler arpHandler = new ARPHandler();
 		hostService.addListener(l2Switching);
 		packetService.addProcessor(arpHandler, PacketProcessor.director(2));
 
