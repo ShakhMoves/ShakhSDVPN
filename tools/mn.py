@@ -7,6 +7,14 @@
 #
 # [] Created By : Parham Alvani (parham.alvani@gmail.com)
 # =======================================
+"""
+mn.py:
+    Script for running a path topology on mininet
+    and connect it into contorller on remote host.
+Usage (example uses IP = 192.168.1.2):
+    From the command line:
+        sudo python mn.py --ip 192.168.1.2
+"""
 from functools import partial
 
 from mininet.net import Mininet
@@ -22,7 +30,11 @@ import argparse
 # h1 --- s1 --- s2 --- h3
 # h2 --- |       | --- h4
 #
-class PathTopo(Topo):
+class PathTopology(Topo):
+    """
+    Subclass of mininet Topo class for
+    creating path topology.
+    """
     def build(self, *args, **params):
         h1 = self.addHost(name='h1')
         s1 = self.addSwitch(name='s1')
@@ -40,12 +52,12 @@ class PathTopo(Topo):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--ip', dest='ip', help='Beehive Network Controller IP Address', default='127.0.0.1', type=str)
-    args = parser.parse_args()
+    cli_args = parser.parse_args()
 
     setLogLevel('info')
 
     switch = partial(OVSSwitch, protocols='OpenFlow13')
-    net = Mininet(topo=PathTopo(), controller=RemoteController('beehive-netctrl', ip=args.ip, port=6633), switch=switch)
+    net = Mininet(topo=PathTopology(), controller=RemoteController('beehive-netctrl', ip=cli_args.ip, port=6633), switch=switch)
     net.start()
     CLI(net)
     net.stop()
