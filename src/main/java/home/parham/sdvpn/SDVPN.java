@@ -1,18 +1,15 @@
 /*
- * Copyright 2014 Open Networking Laboratory
+ * In The Name Of God
+ * ======================================
+ * [] Project Name : ShakhSDVPN
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * [] Package Name : home.parham.sdvpn
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * [] Creation Date : 26-03-2016
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * [] Created By : Parham Alvani (parham.alvani@gmail.com)
+ * =======================================
+*/
 package home.parham.sdvpn;
 
 import org.apache.felix.scr.annotations.*;
@@ -32,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * Skeletal ONOS application component.
  */
 @Component(immediate = true)
-public class AppComponent {
+public class SDVPN {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -60,10 +57,11 @@ public class AppComponent {
 	@Activate
 	protected void activate() {
 		ApplicationId appId = applicationService.getId("home.parham.sdvpn");
-		L2Switching l2Switching = new L2Switching(appId, flowRuleService, groupService, packetService, deviceService,
+		L2Switching l2Switching = new L2Switching(appId, flowRuleService, groupService, deviceService,
 			topologyService);
+		ARPHandler arpHandler = new ARPHandler(packetService);
 		hostService.addListener(l2Switching);
-		packetService.addProcessor(l2Switching, PacketProcessor.director(2));
+		packetService.addProcessor(arpHandler, PacketProcessor.director(2));
 
 		log.info("Started");
 	}
