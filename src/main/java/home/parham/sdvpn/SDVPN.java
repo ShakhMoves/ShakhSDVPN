@@ -19,6 +19,7 @@ import org.onosproject.net.device.DeviceService;
 import org.onosproject.net.flow.FlowRuleService;
 import org.onosproject.net.group.GroupService;
 import org.onosproject.net.host.HostService;
+import org.onosproject.net.intent.IntentService;
 import org.onosproject.net.packet.PacketProcessor;
 import org.onosproject.net.packet.PacketService;
 import org.onosproject.net.topology.TopologyService;
@@ -54,13 +55,18 @@ public class SDVPN {
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
 	protected TopologyService topologyService;
 
+	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+	protected IntentService intentService;
+
 	@Activate
 	protected void activate() {
 		ApplicationId appId = applicationService.getId("home.parham.sdvpn");
 		L2SwitchingMPLS l2SwitchingMPLS = new L2SwitchingMPLS(appId, flowRuleService, groupService, deviceService,
 			topologyService);
+		L2SwitchingIntent l2SwitchingIntent = new L2SwitchingIntent(appId, intentService);
 		ARPHandler arpHandler = new ARPHandler();
-		hostService.addListener(l2SwitchingMPLS);
+		//hostService.addListener(l2SwitchingMPLS);
+		hostService.addListener(l2SwitchingIntent);
 		packetService.addProcessor(arpHandler, PacketProcessor.director(2));
 
 		log.info("Started");
