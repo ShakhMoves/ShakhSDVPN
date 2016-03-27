@@ -165,18 +165,20 @@ public class L2SwitchingMPLS implements HostListener {
 					buildTunnelPath(p, gkey);
 				}
 
-				/* Add our last rule for sink device */
-				TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
-				treatmentBuilder.setOutput(h.location().port());
-				treatmentBuilder.popMpls(EtherType.IPV4.ethType());
-				TrafficTreatment treatment = treatmentBuilder.build();
-				GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
-				List<GroupBucket> bucketList = new ArrayList<>();
-				bucketList.add(bucket);
-				GroupBuckets buckets = new GroupBuckets(bucketList);
 
-				groupService.addBucketsToGroup(h.location().deviceId(), gkey, buckets, gkey, appId);
 			}
+			/* Rules for dismissing the MPLS tag at source Switch */
+
+			TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
+			treatmentBuilder.setOutput(host.location().port());
+			treatmentBuilder.popMpls(EtherType.IPV4.ethType());
+			TrafficTreatment treatment = treatmentBuilder.build();
+			GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
+			List<GroupBucket> bucketList = new ArrayList<>();
+			bucketList.add(bucket);
+			GroupBuckets buckets = new GroupBuckets(bucketList);
+
+			groupService.addBucketsToGroup(host.location().deviceId(), gkey, buckets, gkey, appId);
 
 			/* Rules for applying the MPLS tag at source switch */
 
@@ -185,11 +187,11 @@ public class L2SwitchingMPLS implements HostListener {
 			TrafficSelector selector = selectorBuilder.matchInPort(host.location().port()).build();
 
 			/* Build traffic treatment */
-			TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
+			treatmentBuilder = DefaultTrafficTreatment.builder();
 			treatmentBuilder.pushMpls();
 			treatmentBuilder.setMpls(mplsLabel);
 			treatmentBuilder.transition(1);
-			TrafficTreatment treatment = treatmentBuilder.build();
+			treatment = treatmentBuilder.build();
 
 			/*
 			 * Build flow rule based on our treatment and

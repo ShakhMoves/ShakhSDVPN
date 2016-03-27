@@ -65,8 +65,8 @@ public class SDVPN {
 			topologyService);
 		L2SwitchingIntent l2SwitchingIntent = new L2SwitchingIntent(appId, intentService);
 		ARPHandler arpHandler = new ARPHandler();
-		//hostService.addListener(l2SwitchingMPLS);
-		hostService.addListener(l2SwitchingIntent);
+		hostService.addListener(l2SwitchingMPLS);
+		//hostService.addListener(l2SwitchingIntent);
 		packetService.addProcessor(arpHandler, PacketProcessor.director(2));
 
 		log.info("Started");
