@@ -31,3 +31,6 @@ onos-karaf
 onos-app 127.0.0.1 install target/sdvpn-{version}.oar
 onos-app 127.0.0.1 activate home.parham.sdvpn
 ```
+## Sample
+For testing our project we use following network architecture:
+![Sample Network Architecture](http://www.googledrive.com/host/0B33KzMHyLoH2eVNHWFJZdmthOVk/ShakhSDVPN-sample-1.jpg)
