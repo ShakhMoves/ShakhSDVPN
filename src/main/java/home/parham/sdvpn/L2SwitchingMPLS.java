@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class L2Switching implements HostListener {
+public class L2SwitchingMPLS implements HostListener {
 
 	private ApplicationId appId;
 
@@ -45,8 +45,8 @@ public class L2Switching implements HostListener {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
-	public L2Switching(ApplicationId appId, FlowRuleService flowRuleService, GroupService groupService,
-	                   DeviceService deviceService, TopologyService topologyService) {
+	public L2SwitchingMPLS(ApplicationId appId, FlowRuleService flowRuleService, GroupService groupService,
+	                       DeviceService deviceService, TopologyService topologyService) {
 		this.appId = appId;
 
 		this.flowRuleService = flowRuleService;
