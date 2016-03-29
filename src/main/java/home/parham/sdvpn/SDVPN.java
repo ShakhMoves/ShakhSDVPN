@@ -35,28 +35,28 @@ public class SDVPN {
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	protected ApplicationService applicationService;
+	private ApplicationService applicationService;
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
 	private HostService hostService;
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	protected FlowRuleService flowRuleService;
+	private FlowRuleService flowRuleService;
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	protected GroupService groupService;
+	private GroupService groupService;
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	protected PacketService packetService;
+	private PacketService packetService;
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	protected DeviceService deviceService;
+	private DeviceService deviceService;
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	protected TopologyService topologyService;
+	private TopologyService topologyService;
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	protected IntentService intentService;
+	private IntentService intentService;
 
 	@Activate
 	protected void activate() {
