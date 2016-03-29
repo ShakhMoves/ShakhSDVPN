@@ -210,8 +210,10 @@ public class L2SwitchingMPLS implements HostListener {
 		}
 	}
 
-	/*
+	/**
 	 * We use this function in order to simplify our MPLS tunnel creation :)
+	 * @param p : create MPLS tunnel based on path p.
+	 * @param gkey : group key to identifies OpenFlow group tables.
 	 */
 	private void buildTunnelPath(Path p, GroupKey gkey) {
 		/* Add MPLS forwarding rule for all devices except sink device */
