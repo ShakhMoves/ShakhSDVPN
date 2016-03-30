@@ -61,7 +61,7 @@ class SampleTopology(Topo):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--ip', dest='ip', help='Beehive Network Controller IP Address', default='127.0.0.1', type=str)
+    parser.add_argument('--ip', dest='ip', help='ONOS Network Controller IP Address', default='127.0.0.1', type=str)
     cli_args = parser.parse_args()
 
     setLogLevel('info')
