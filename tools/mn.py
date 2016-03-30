@@ -15,28 +15,25 @@ Usage (example uses IP = 192.168.1.2):
     From the command line:
         sudo python mn.py --ip 192.168.1.2
 """
-from functools import partial
-
 from mininet.net import Mininet
 from mininet.net import CLI
 from mininet.log import setLogLevel
 from mininet.node import RemoteController
 from mininet.node import OVSSwitch
 from mininet.topo import Topo
-import argparse
 
-#
-# We want to build following topology:
-# h1 --- s1 -+- s2 --- h4
-# h2 --- |   |   | --- h5
-#            s5
-#            |
-# h3 --- s3 -+- s4 --- h6
-#
+import argparse
+from functools import partial
+
 class SampleTopology(Topo):
     """
     Subclass of mininet Topo class for
-    creating path topology.
+    creating following topology:
+    h1 --- s1 -+- s2 --- h4
+    h2 --- |   |   | --- h5
+               s5
+               |
+    h3 --- s3 -+- s4 --- h6
     """
     def build(self, *args, **params):
         s1 = self.addSwitch(name='s1')
