@@ -34,3 +34,8 @@ onos-app 127.0.0.1 activate home.parham.sdvpn
 ## Sample
 For testing our project we use following network architecture:
 ![Sample Network Architecture](http://www.googledrive.com/host/0B33KzMHyLoH2eVNHWFJZdmthOVk/ShakhSDVPN-sample-1.jpg)
+
+## ToDO
+- [ ] Provide MPLS and Intent connectivity as a implementation of connectivity interface.
+- [ ] Provide SDVPN as ONOS service.
+- [ ] Improve our tunnels building mechanism and handle host delete and host updated events.
