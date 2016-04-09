@@ -13,13 +13,16 @@
 
 package home.parham.sdvpn;
 
-import org.onosproject.cli.AbstractShellCommand;
 import org.apache.karaf.shell.commands.Command;
+import org.onosproject.cli.AbstractShellCommand;
+
 
 @Command(scope = "sdvpn", name = "add-rule", description = "Add rule for dropping packet at hosts")
 public class SDVPNAddRuleCommand extends AbstractShellCommand {
+
 	@Override
 	protected void execute() {
-
+		SDVPN sdvpn = get(SDVPN.class);
+		print(sdvpn.toString());
 	}
 }
