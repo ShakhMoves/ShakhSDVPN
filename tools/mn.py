@@ -25,6 +25,8 @@ from mininet.topo import Topo
 import argparse
 from functools import partial
 
+import vlan
+
 class SampleTopology(Topo):
     """
     Subclass of mininet Topo class for
@@ -41,8 +43,8 @@ class SampleTopology(Topo):
         switch3 = self.addSwitch(name='s3')
         switch4 = self.addSwitch(name='s4')
         switch5 = self.addSwitch(name='s5')
-        host1 = self.addHost(name='h1')
-        host2 = self.addHost(name='h2')
+        host1 = self.addHost(name='h1', cls=vlan.VLANHost, vlan=101)
+        host2 = self.addHost(name='h2', cls=vlan.VLANHost, vlan=101)
         host3 = self.addHost(name='h3')
         host4 = self.addHost(name='h4')
         host5 = self.addHost(name='h5')
