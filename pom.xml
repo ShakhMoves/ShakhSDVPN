@@ -28,7 +28,6 @@
 
     <properties>
         <onos.version>1.6.0-SNAPSHOT</onos.version>
-        <!-- Uncomment to generate ONOS app from this module. -->
         <onos.app.name>home.parham.sdvpn</onos.app.name>
         <onos.app.origin>ShakhMoves</onos.app.origin>
     </properties>
@@ -133,5 +132,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
