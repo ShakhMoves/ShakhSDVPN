@@ -188,9 +188,9 @@ public class L2SwitchingMPLS implements HostListener {
 
 			/* Build traffic treatment */
 			treatmentBuilder = DefaultTrafficTreatment.builder();
+			treatmentBuilder.popVlan();
 			treatmentBuilder.pushMpls();
 			treatmentBuilder.setMpls(mplsLabel);
-			treatmentBuilder.setVlanId(VlanId.NONE);
 			treatmentBuilder.transition(1);
 			treatment = treatmentBuilder.build();
 
