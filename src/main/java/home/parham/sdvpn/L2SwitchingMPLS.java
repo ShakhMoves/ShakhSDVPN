@@ -167,7 +167,7 @@ public class L2SwitchingMPLS implements HostListener {
 
 
 			}
-			/* Rules for dismissing the MPLS tag at source Switch */
+			/* Rules for dismissing the MPLS tag at sink Switch */
 
 			TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
 			treatmentBuilder.setOutput(host.location().port());
@@ -190,6 +190,7 @@ public class L2SwitchingMPLS implements HostListener {
 			treatmentBuilder = DefaultTrafficTreatment.builder();
 			treatmentBuilder.pushMpls();
 			treatmentBuilder.setMpls(mplsLabel);
+			treatmentBuilder.setVlanId(VlanId.NONE);
 			treatmentBuilder.transition(1);
 			treatment = treatmentBuilder.build();
 
@@ -212,7 +213,8 @@ public class L2SwitchingMPLS implements HostListener {
 
 	/**
 	 * We use this function in order to simplify our MPLS tunnel creation :)
-	 * @param p : create MPLS tunnel based on path p.
+	 *
+	 * @param p    : create MPLS tunnel based on path p.
 	 * @param gkey : group key to identifies OpenFlow group tables.
 	 */
 	private void buildTunnelPath(Path p, GroupKey gkey) {
