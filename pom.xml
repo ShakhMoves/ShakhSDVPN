@@ -20,7 +20,7 @@
 
     <groupId>home.parham.sdvpn</groupId>
     <artifactId>sdvpn</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.4.5-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <description>SDN based VPLS implementation</description>
