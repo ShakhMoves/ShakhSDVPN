@@ -170,7 +170,9 @@ public class L2SwitchingMPLS implements HostListener {
 
 			TrafficTreatment.Builder treatmentBuilder = DefaultTrafficTreatment.builder();
 			treatmentBuilder.setOutput(host.location().port());
-			treatmentBuilder.popMpls(EtherType.VLAN.ethType());
+			treatmentBuilder.popMpls(EtherType.IPV4.ethType());
+			treatmentBuilder.pushVlan();
+			treatmentBuilder.setVlanId(host.vlan());
 			TrafficTreatment treatment = treatmentBuilder.build();
 			GroupBucket bucket = DefaultGroupBucket.createAllGroupBucket(treatment);
 			List<GroupBucket> bucketList = new ArrayList<>();
@@ -183,12 +185,11 @@ public class L2SwitchingMPLS implements HostListener {
 
 			/* Build traffic selector */
 			TrafficSelector.Builder selectorBuilder = DefaultTrafficSelector.builder();
-			TrafficSelector selector = selectorBuilder.matchInPort(host.location().port()).matchEthType((short) 0x8100).build();
+			TrafficSelector selector = selectorBuilder.matchInPort(host.location().port()).matchVlanId(VlanId.ANY).build();
 
 			/* Build traffic treatment */
 			treatmentBuilder = DefaultTrafficTreatment.builder();
 			treatmentBuilder.popVlan();
-			treatmentBuilder.immediate();
 			treatmentBuilder.pushMpls();
 			treatmentBuilder.setMpls(mplsLabel);
 			treatmentBuilder.transition(1);
