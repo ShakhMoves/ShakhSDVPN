@@ -67,15 +67,15 @@ public class SDVPN {
 
 	/* WebUI related things :) */
 
-	private static final String VIEW_ID = "sampleCustom";
-	private static final String VIEW_TEXT = "Sample Custom";
+	private static final String VIEW_ID = "ShakhSDVPN";
+	private static final String VIEW_TEXT = "ShakhSDPVN";
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
 	private UiExtensionService uiExtensionService;
 
 	/* List of application views */
 	private final List<UiView> uiViews = ImmutableList.of(
-		new UiView(UiView.Category.OTHER, VIEW_ID, VIEW_TEXT)
+		new UiView(UiView.Category.NETWORK, VIEW_ID, VIEW_TEXT)
 	);
 
 	/* Factory for UI message handlers */
@@ -85,7 +85,7 @@ public class SDVPN {
 		);
 
 	/* Application UI extension */
-	protected UiExtension extension =
+	private UiExtension extension =
 		new UiExtension.Builder(getClass().getClassLoader(), uiViews)
 			.resourcePath(VIEW_ID)
 			.messageHandlerFactory(messageHandlerFactory)
