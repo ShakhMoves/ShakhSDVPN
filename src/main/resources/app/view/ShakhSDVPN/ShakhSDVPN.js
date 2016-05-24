@@ -31,8 +31,8 @@
     }
 
 
-    angular.module('ovSampleCustom', [])
-        .controller('OvSampleCustomCtrl',
+    angular.module('ovShakhSDVPN', [])
+        .controller('OvShakhSDVPNCtrl',
         ['$log', '$scope', 'WebSocketService', 'KeyService',
 
         function (_$log_, _$scope_, _wss_, _ks_) {
