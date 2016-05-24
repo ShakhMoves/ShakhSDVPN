@@ -71,7 +71,7 @@ public class SDVPN {
 	private static final String VIEW_TEXT = "Sample Custom";
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	protected UiExtensionService uiExtensionService;
+	private UiExtensionService uiExtensionService;
 
 	/* List of application views */
 	private final List<UiView> uiViews = ImmutableList.of(
@@ -93,7 +93,7 @@ public class SDVPN {
 
 	@Activate
 	protected void activate() {
-		ApplicationId appId = applicationService.getId("home.parham.sdvpn");
+		ApplicationId appId = applicationService.getId("ShakhSDVPN");
 		L2SwitchingVLAN l2SwitchingVLAN = new L2SwitchingVLAN(appId, flowRuleService, groupService, deviceService,
 			topologyService);
 		L2SwitchingMPLS l2SwitchingMPLS = new L2SwitchingMPLS(appId, flowRuleService, groupService, deviceService,
