@@ -93,7 +93,7 @@ public class SDVPN {
 
 	@Activate
 	protected void activate() {
-		ApplicationId appId = applicationService.getId("ShakhSDVPN");
+		ApplicationId appId = applicationService.getId("home.parham.sdvpn");
 		L2SwitchingVLAN l2SwitchingVLAN = new L2SwitchingVLAN(appId, flowRuleService, groupService, deviceService,
 			topologyService);
 		L2SwitchingMPLS l2SwitchingMPLS = new L2SwitchingMPLS(appId, flowRuleService, groupService, deviceService,
