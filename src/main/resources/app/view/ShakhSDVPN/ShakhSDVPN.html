@@ -6,6 +6,25 @@
         </div>
     </div>
 
+    <div>
+        <a ng-repeat="host in hosts track by $index">
+            <table>
+                <tr>
+                    <td>IP Address</td>
+                    <td>{{host.ip}}</td>
+                </tr>
+                <tr>
+                    <td>MAC Address</td>
+                    <td>{{host.mac}}</td>
+                </tr>
+                <tr>
+                    <td>Vlan</td>
+                    <td>{{host.vlan}}</td>
+                </tr>
+            </table>
+        </a>
+    </div>
+
     <div class="data-panel">
         <form>
             <div class="row">
