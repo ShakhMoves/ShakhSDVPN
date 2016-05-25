@@ -65,31 +65,15 @@ public class SDVPN {
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
 	private IntentService intentService;
 
-	/* WebUI related things :) */
+	/* WebUI related fields :) */
 
 	private static final String VIEW_ID = "ShakhSDVPN";
 	private static final String VIEW_TEXT = "ShakhSDPVN";
+	private UiExtension extension;
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
 	private UiExtensionService uiExtensionService;
 
-	/* List of application views */
-	private final List<UiView> uiViews = ImmutableList.of(
-		new UiView(UiView.Category.NETWORK, VIEW_ID, VIEW_TEXT)
-	);
-
-	/* Factory for UI message handlers */
-	private final UiMessageHandlerFactory messageHandlerFactory =
-		() -> ImmutableList.of(
-			new AppUiMessageHandler()
-		);
-
-	/* Application UI extension */
-	private UiExtension extension =
-		new UiExtension.Builder(getClass().getClassLoader(), uiViews)
-			.resourcePath(VIEW_ID)
-			.messageHandlerFactory(messageHandlerFactory)
-			.build();
 
 	@Activate
 	protected void activate() {
@@ -105,7 +89,30 @@ public class SDVPN {
 		//hostService.addListener(l2SwitchingIntent);
 		packetService.addProcessor(arpHandler, PacketProcessor.director(2));
 
+		/* WebUI related things :)) */
+
+		SDVPNWebHandler sdvpnWebHandler = new SDVPNWebHandler();
+
+		/* List of application views */
+		final List<UiView> uiViews = ImmutableList.of(
+			new UiView(UiView.Category.NETWORK, VIEW_ID, VIEW_TEXT)
+		);
+
+		/* Factory for UI message handlers */
+		final UiMessageHandlerFactory messageHandlerFactory =
+			() -> ImmutableList.of(
+				new AppUiMessageHandler(),
+				sdvpnWebHandler
+			);
+
+		/* Application UI extension */
+		extension =
+			new UiExtension.Builder(getClass().getClassLoader(), uiViews)
+				.resourcePath(VIEW_ID)
+				.messageHandlerFactory(messageHandlerFactory)
+				.build();
 		uiExtensionService.register(extension);
+		hostService.addListener(sdvpnWebHandler);
 
 		log.info("Started");
 	}

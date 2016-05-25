@@ -13,6 +13,6 @@
 
 package home.parham.sdvpn;
 
-public class SDVPNWeb {
+public class SDVPNWebHandler {
 
 }
