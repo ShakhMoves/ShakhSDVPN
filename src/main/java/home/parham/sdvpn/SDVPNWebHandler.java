@@ -30,7 +30,7 @@ public class SDVPNWebHandler extends AppUiMessageHandler implements HostListener
 			hostMessage.put("mac", host.mac().toString());
 			hostMessage.put("vlan", host.vlan().toShort());
 			hostMessage.put("ip", host.ipAddresses().toString());
-			sendMessage(hostMessage);
+			connection().sendMessage("hostEvent", 0, hostMessage);
 		}
 	}
 }
