@@ -29,46 +29,46 @@ import java.util.Collection;
  */
 public class AppUiMessageHandler extends UiMessageHandler {
 
-    private static final String SAMPLE_CUSTOM_DATA_REQ = "sampleCustomDataRequest";
-    private static final String SAMPLE_CUSTOM_DATA_RESP = "sampleCustomDataResponse";
+	private static final String SAMPLE_CUSTOM_DATA_REQ = "sampleCustomDataRequest";
+	private static final String SAMPLE_CUSTOM_DATA_RESP = "sampleCustomDataResponse";
 
-    private static final String NUMBER = "number";
-    private static final String SQUARE = "square";
-    private static final String CUBE = "cube";
-    private static final String MESSAGE = "message";
-    private static final String MSG_FORMAT = "Next incrememt is %d units";
+	private static final String NUMBER = "number";
+	private static final String SQUARE = "square";
+	private static final String CUBE = "cube";
+	private static final String MESSAGE = "message";
+	private static final String MSG_FORMAT = "Next incrememt is %d units";
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+	private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private long someNumber = 1;
-    private long someIncrement = 1;
+	private long someNumber = 1;
+	private long someIncrement = 1;
 
-    @Override
-    protected Collection<RequestHandler> createRequestHandlers() {
-        return ImmutableSet.of(
-                new SampleCustomDataRequestHandler()
-        );
-    }
+	@Override
+	protected Collection<RequestHandler> createRequestHandlers() {
+		return ImmutableSet.of(
+			new SampleCustomDataRequestHandler()
+		);
+	}
 
-    // handler for sample data requests
-    private final class SampleCustomDataRequestHandler extends RequestHandler {
+	// handler for sample data requests
+	private final class SampleCustomDataRequestHandler extends RequestHandler {
 
-        private SampleCustomDataRequestHandler() {
-            super(SAMPLE_CUSTOM_DATA_REQ);
-        }
+		private SampleCustomDataRequestHandler() {
+			super(SAMPLE_CUSTOM_DATA_REQ);
+		}
 
-        @Override
-        public void process(long sid, ObjectNode payload) {
-            someIncrement++;
-            someNumber += someIncrement;
-            log.debug("Computing data for {}...", someNumber);
+		@Override
+		public void process(long sid, ObjectNode payload) {
+			someIncrement++;
+			someNumber += someIncrement;
+			log.debug("Computing data for {}...", someNumber);
 
-            ObjectNode result = objectNode();
-            result.put(NUMBER, someNumber);
-            result.put(SQUARE, someNumber * someNumber);
-            result.put(CUBE, someNumber * someNumber * someNumber);
-            result.put(MESSAGE, String.format(MSG_FORMAT, someIncrement + 1));
-            sendMessage(SAMPLE_CUSTOM_DATA_RESP, 0, result);
-        }
-    }
+			ObjectNode result = objectNode();
+			result.put(NUMBER, someNumber);
+			result.put(SQUARE, someNumber * someNumber);
+			result.put(CUBE, someNumber * someNumber * someNumber);
+			result.put(MESSAGE, String.format(MSG_FORMAT, someIncrement + 1));
+			sendMessage(SAMPLE_CUSTOM_DATA_RESP, 0, result);
+		}
+	}
 }
