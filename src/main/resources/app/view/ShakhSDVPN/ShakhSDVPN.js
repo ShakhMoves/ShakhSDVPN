@@ -5,13 +5,13 @@
     // injected refs
     var $log, $scope, wss, ks;
 
-    // constants
-    var dataReq = 'sampleCustomDataRequest',
-        dataResp = 'sampleCustomDataResponse';
+    // constant
+    var hostEvent = "hostEvent";
+    var addRule = "addRule";
 
     function addKeyBindings() {
         var map = {
-            space: [getData, 'Fetch data from server'],
+            space: [dropRule, 'Add drop rule'],
 
             _helpFormat: [
                 ['space']
@@ -21,17 +21,19 @@
         ks.keyBindings(map);
     }
 
-    function getData() {
-        wss.sendEvent(dataReq);
-    }
-
-    function respDataCb(data) {
-        $scope.data = data;
-        $scope.$apply();
+    function dropRule() {
+        $log.log($scope.srcHost);
+        $log.log($scope.dstHost);
+        var src_host = $scope.srcHost;
+        var dst_host = $scope.dstHost;
+        wss.sendEvent("dropRule", {
+            h1: src_host,
+            h2: dst_host
+        });
     }
 
     function hostEventCb(host) {
-        $scope.hosts.append(host);
+        $scope.hosts.push(host);
         $scope.$apply()
     }
 
@@ -48,20 +50,14 @@
 
                     var handlers = {};
                     $scope.hosts = [];
-                    $scope.data = {};
 
                     // data response handler
-                    handlers[dataResp] = respDataCb;
-                    handlers['hostEvent'] = hostEventCb;
+                    handlers[hostEvent] = hostEventCb;
                     wss.bindHandlers(handlers);
 
                     addKeyBindings();
 
-                    // custom click handler
-                    $scope.getData = getData;
-
-                    // get data the first time...
-                    getData();
+                    $scope.dropRule = dropRule;
 
                     // cleanup
                     $scope.$on('$destroy', function () {
