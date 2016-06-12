@@ -91,7 +91,7 @@ public class SDVPN {
 
 		/* WebUI related things :)) */
 
-		SDVPNWebHandler sdvpnWebHandler = new SDVPNWebHandler();
+		SDVPNWebHandler sdvpnWebHandler = new SDVPNWebHandler(appId, flowRuleService, hostService);
 
 		/* List of application views */
 		final List<UiView> uiViews = ImmutableList.of(
@@ -101,7 +101,6 @@ public class SDVPN {
 		/* Factory for UI message handlers */
 		final UiMessageHandlerFactory messageHandlerFactory =
 			() -> ImmutableList.of(
-				new AppUiMessageHandler(),
 				sdvpnWebHandler
 			);
 
