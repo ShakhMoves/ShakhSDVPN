@@ -68,7 +68,7 @@ public class SDVPN {
 	/* WebUI related fields :) */
 
 	private static final String VIEW_ID = "ShakhSDVPN";
-	private static final String VIEW_TEXT = "ShakhSDPVN";
+	private static final String VIEW_TEXT = "ShakhSDVPN";
 	private UiExtension extension;
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
