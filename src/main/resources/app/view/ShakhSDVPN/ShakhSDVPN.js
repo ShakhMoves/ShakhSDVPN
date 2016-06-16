@@ -1,4 +1,4 @@
-// js for sample app custom view
+// js for ShakhSDVPN app custom view
 (function () {
     'use strict';
 
@@ -38,35 +38,34 @@
     }
 
 
-    angular.module('ovShakhSDVPN', [])
-        .controller('OvShakhSDVPNCtrl',
-            ['$log', '$scope', 'WebSocketService', 'KeyService',
+    var app = angular.module('ovShakhSDVPN', []);
+    app.controller('OvShakhSDVPNCtrl',
+        ['$log', '$scope', 'WebSocketService', 'KeyService',
+            function (_$log_, _$scope_, _wss_, _ks_) {
+                $log = _$log_;
+                $scope = _$scope_;
+                wss = _wss_;
+                ks = _ks_;
 
-                function (_$log_, _$scope_, _wss_, _ks_) {
-                    $log = _$log_;
-                    $scope = _$scope_;
-                    wss = _wss_;
-                    ks = _ks_;
+                var handlers = {};
+                $scope.hosts = [];
 
-                    var handlers = {};
-                    $scope.hosts = [];
+                // data response handler
+                handlers[hostEvent] = hostEventCb;
+                wss.bindHandlers(handlers);
 
-                    // data response handler
-                    handlers[hostEvent] = hostEventCb;
-                    wss.bindHandlers(handlers);
+                addKeyBindings();
 
-                    addKeyBindings();
+                $scope.dropRule = dropRule;
 
-                    $scope.dropRule = dropRule;
+                // cleanup
+                $scope.$on('$destroy', function () {
+                    wss.unbindHandlers(handlers);
+                    ks.unbindKeys();
+                    $log.log('OvShakhSDVPNCtrl has been destroyed');
+                });
 
-                    // cleanup
-                    $scope.$on('$destroy', function () {
-                        wss.unbindHandlers(handlers);
-                        ks.unbindKeys();
-                        $log.log('OvShakhSDVPNCtrl has been destroyed');
-                    });
-
-                    $log.log('OvShakhSDVPNCtrl has been created');
-                }]);
+                $log.log('OvShakhSDVPNCtrl has been created');
+            }]);
 
 }());
