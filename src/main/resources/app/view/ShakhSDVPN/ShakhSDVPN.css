@@ -1,48 +1,52 @@
-/* css for sample app custom view */
+/* css for ShakhSDVPN custom view */
 
-#ov-sample-custom {
+#ov-shakh-sdvpn {
     padding: 20px;
 }
-.light #ov-sample-custom {
+
+.light #ov-shakh-sdvpn {
     color: navy;
 }
-.dark #ov-sample-custom {
+
+.dark #ov-shakh-sdvpn {
     color: #88f;
 }
 
-#ov-sample-custom .button-panel {
+#ov-shakh-sdvpn .button-panel {
     margin: 10px;
     width: 200px;
 }
 
-.light #ov-sample-custom .button-panel {
+.light #ov-shakh-sdvpn .button-panel {
     background-color: #ccf;
 }
-.dark #ov-sample-custom .button-panel {
+
+.dark #ov-shakh-sdvpn .button-panel {
     background-color: #444;
 }
 
-#ov-sample-custom .my-button {
+#ov-shakh-sdvpn .my-button {
     cursor: pointer;
     padding: 4px;
     text-align: center;
 }
 
-.light #ov-sample-custom .my-button {
+.light #ov-shakh-sdvpn .my-button {
     color: white;
     background-color: #99d;
 }
-.dark #ov-sample-custom .my-button {
+
+.dark #ov-shakh-sdvpn .my-button {
     color: black;
     background-color: #aaa;
 }
 
-#ov-sample-custom .number {
+#ov-shakh-sdvpn .number {
     font-size: 140%;
     text-align: right;
 }
 
-#ov-sample-custom .quote {
+#ov-shakh-sdvpn .quote {
     margin: 10px 20px;
     font-style: italic;
 }
