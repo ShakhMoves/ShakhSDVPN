@@ -13,8 +13,6 @@
 
 package home.parham.sdvpn;
 
-import org.onlab.packet.EthType.EtherType;
-import org.onlab.packet.MplsLabel;
 import org.onlab.packet.VlanId;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.DefaultGroupId;
