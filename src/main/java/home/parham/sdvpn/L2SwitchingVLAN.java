@@ -69,6 +69,7 @@ public class L2SwitchingVLAN implements HostListener {
 	/**
 	 * @param event HostEvent that we use to detect adding new hosts to the network
 	 */
+	@Override
 	public void event(HostEvent event) {
 		if (event.type() == Type.HOST_ADDED) {
 			Host host = event.subject();
