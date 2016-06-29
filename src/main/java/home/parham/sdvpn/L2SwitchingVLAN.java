@@ -30,6 +30,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+/**
+ * building Vlan tunnels for all the hosts with a specific Vlan
+ * by adding a host, tunnels will be build automatically
+ */
 public class L2SwitchingVLAN implements HostListener {
 
 	private ApplicationId appId;
@@ -43,6 +47,13 @@ public class L2SwitchingVLAN implements HostListener {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
+	/**
+	 * @param appId           application ID
+	 * @param flowRuleService flowRuleService that we use in order to apply flow rules
+	 * @param groupService    group service that we use to make a group of flowRules with the same traffic selector
+	 * @param deviceService   device service that we use for getting all available switches
+	 * @param topologyService topology service for getting available path between two devices
+	 */
 	public L2SwitchingVLAN(ApplicationId appId, FlowRuleService flowRuleService, GroupService groupService,
 	                       DeviceService deviceService, TopologyService topologyService) {
 		this.appId = appId;
@@ -55,6 +66,9 @@ public class L2SwitchingVLAN implements HostListener {
 		this.vLanIdMap = new HashMap<>();
 	}
 
+	/**
+	 * @param event HostEvent that we use to detect adding new hosts to the network
+	 */
 	public void event(HostEvent event) {
 		if (event.type() == Type.HOST_ADDED) {
 			Host host = event.subject();
