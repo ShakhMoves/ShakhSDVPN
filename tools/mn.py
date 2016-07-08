@@ -15,6 +15,9 @@ Usage (example uses IP = 192.168.1.2):
     From the command line:
         sudo python mn.py --ip 192.168.1.2
 """
+import argparse
+from functools import partial
+
 from mininet.net import Mininet
 from mininet.net import CLI
 from mininet.log import setLogLevel
@@ -22,10 +25,8 @@ from mininet.node import RemoteController
 from mininet.node import OVSSwitch
 from mininet.topo import Topo
 
-import argparse
-from functools import partial
-
 import vlan
+
 
 class SampleTopology(Topo):
     """
@@ -63,13 +64,22 @@ class SampleTopology(Topo):
 
 if __name__ == '__main__':
     PARSER = argparse.ArgumentParser()
-    PARSER.add_argument('--ip', dest='ip', help='ONOS Network Controller IP Address', default='127.0.0.1', type=str)
+    PARSER.add_argument('ips', metavar='ip',
+                        help='ONOS Network Controllers IP Addresses',
+                        default=['127.0.0.1'], type=str, nargs='*')
     CLI_ARGS = PARSER.parse_args()
 
     setLogLevel('info')
 
     SWITCH = partial(OVSSwitch, protocols='OpenFlow13')
-    NET = Mininet(topo=SampleTopology(), controller=RemoteController('ONOS', ip=CLI_ARGS.ip, port=6633), switch=SWITCH)
+
+    rcs = []
+    for ip in CLI_ARGS.ips:
+        rcs.append(RemoteController('ONOS-%s' % ip, ip=ip, port=6633))
+    NET = Mininet(topo=SampleTopology(), switch=SWITCH, build=False)
+    for rc in rcs:
+        NET.addController(rc)
+    NET.build()
     NET.start()
     CLI(NET)
     NET.stop()
