@@ -27,7 +27,7 @@
     <url>http://onosproject.org</url>
 
     <properties>
-        <onos.version>1.6.0-SNAPSHOT</onos.version>
+        <onos.version>1.6.0</onos.version>
     </properties>
 
     <dependencies>
