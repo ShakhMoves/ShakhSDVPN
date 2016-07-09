@@ -73,11 +73,11 @@ if __name__ == '__main__':
 
     SWITCH = partial(OVSSwitch, protocols='OpenFlow13')
 
-    rcs = []
+    RCS = []
     for ip in CLI_ARGS.ips:
-        rcs.append(RemoteController('ONOS-%s' % ip, ip=ip, port=6633))
+        RCS.append(RemoteController('ONOS-%s' % ip, ip=ip, port=6633))
     NET = Mininet(topo=SampleTopology(), switch=SWITCH, build=False)
-    for rc in rcs:
+    for rc in RCS:
         NET.addController(rc)
     NET.build()
     NET.start()
