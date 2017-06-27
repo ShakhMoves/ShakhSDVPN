@@ -19,10 +19,12 @@ high performance and abstractions to make it easy to create apps and services.
 ### Installing ONOS
 First of all you must have ONOS installed on your system.
 you can install it from [here](https://wiki.onosproject.org/display/ONOS/Installing+and+Running+ONOS).
+
 ### Compile :)
 ```shell
 mvn install
 ```
+
 ### Up and Running
 ```shell
 onos-karaf
@@ -31,9 +33,10 @@ onos-karaf
 onos-app 127.0.0.1 install target/sdvpn-{version}.oar
 onos-app 127.0.0.1 activate home.parham.sdvpn
 ```
+
 ## Sample
 For testing our project we use following network architecture:
-![Sample Network Architecture](http://www.googledrive.com/host/0B33KzMHyLoH2eVNHWFJZdmthOVk/ShakhSDVPN-sample-1.jpg)
+![Sample Network Architecture](doc/sample-1.jpg)
 
 ## ToDO
 - [ ] Provide MPLS and Intent connectivity as a implementation of connectivity interface.
